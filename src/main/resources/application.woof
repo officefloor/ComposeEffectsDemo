@@ -2,22 +2,34 @@
   <http-continuations>
   </http-continuations>
   <http-inputs>
-    <http-input path="/cats" method="POST" secure="false" x="251" y="107">
+    <http-input path="/cats" method="POST" secure="false" x="197" y="99">
       <section name="Synchronous" input="Cats"/>
+    </http-input>
+    <http-input path="/imperative" method="POST" secure="false" x="171" y="152">
+      <section name="Synchronous" input="Imperative"/>
+    </http-input>
+    <http-input path="/reactor" method="POST" secure="false" x="187" y="201">
+      <section name="Synchronous" input="Reactor"/>
+    </http-input>
+    <http-input path="/zio" method="POST" secure="false" x="202" y="247">
+      <section name="Synchronous" input="ZIO"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Synchronous" source="net.officefloor.activity.ActivitySectionSource" location="Synchronous.activity" x="409" y="87">
+    <section name="Synchronous" source="net.officefloor.activity.ActivitySectionSource" location="Synchronous.activity" x="433" y="133">
       <input name="Cats" parameter-type=""/>
+      <input name="Imperative" parameter-type=""/>
+      <input name="Reactor" parameter-type=""/>
+      <input name="ZIO" parameter-type=""/>
       <output name="Response" argument-type="">
         <procedure name="send"/>
       </output>
     </section>
   </sections>
   <procedures>
-    <procedure name="send" resource="net.officefloor.demo.Send" source="Class" procedure="send" x="678" y="173">
+    <procedure name="send" resource="net.officefloor.demo.Send" source="Class" procedure="send" x="727" y="147">
       <next argument-type="">
       </next>
     </procedure>
