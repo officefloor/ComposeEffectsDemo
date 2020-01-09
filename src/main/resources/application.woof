@@ -1,0 +1,35 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/cats" method="POST" secure="false" x="251" y="107">
+      <section name="Synchronous" input="Cats"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Synchronous" source="net.officefloor.activity.ActivitySectionSource" location="Synchronous.activity" x="409" y="87">
+      <input name="Cats" parameter-type=""/>
+      <output name="Response" argument-type="">
+        <procedure name="send"/>
+      </output>
+    </section>
+  </sections>
+  <procedures>
+    <procedure name="send" resource="net.officefloor.demo.Send" source="Class" procedure="send" x="678" y="173">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

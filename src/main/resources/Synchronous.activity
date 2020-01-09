@@ -1,0 +1,21 @@
+<activity>
+  <inputs>
+    <input name="Cats" argument-type="" x="176" y="63">
+      <procedure name="cats"/>
+    </input>
+  </inputs>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="cats" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="cats" x="307" y="60">
+      <next argument-type="cats.effect.IO">
+        <output name="Response"/>
+      </next>
+    </procedure>
+  </procedures>
+  <exceptions>
+  </exceptions>
+  <outputs>
+    <output name="Response" parameter-type="" x="502" y="74"/>
+  </outputs>
+</activity>
