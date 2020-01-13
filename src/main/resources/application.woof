@@ -2,6 +2,18 @@
   <http-continuations>
   </http-continuations>
   <http-inputs>
+    <http-input path="/async/cats" method="POST" secure="false" x="179" y="367">
+      <section name="Asynchronous" input="Cats"/>
+    </http-input>
+    <http-input path="/async/imperative" method="POST" secure="false" x="160" y="420">
+      <section name="Asynchronous" input="Imperative"/>
+    </http-input>
+    <http-input path="/async/reactor" method="POST" secure="false" x="170" y="473">
+      <section name="Asynchronous" input="Reactor"/>
+    </http-input>
+    <http-input path="/async/zio" method="POST" secure="false" x="192" y="517">
+      <section name="Asynchronous" input="ZIO"/>
+    </http-input>
     <http-input path="/cats" method="POST" secure="false" x="197" y="99">
       <section name="Synchronous" input="Cats"/>
     </http-input>
@@ -18,6 +30,15 @@
   <templates>
   </templates>
   <sections>
+    <section name="Asynchronous" source="net.officefloor.activity.ActivitySectionSource" location="Asynchronous.activity" x="446" y="374">
+      <input name="Cats" parameter-type=""/>
+      <input name="Imperative" parameter-type=""/>
+      <input name="Reactor" parameter-type=""/>
+      <input name="ZIO" parameter-type=""/>
+      <output name="Response" argument-type="">
+        <procedure name="send"/>
+      </output>
+    </section>
     <section name="Synchronous" source="net.officefloor.activity.ActivitySectionSource" location="Synchronous.activity" x="433" y="133">
       <input name="Cats" parameter-type=""/>
       <input name="Imperative" parameter-type=""/>

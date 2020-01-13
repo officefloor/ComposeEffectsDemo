@@ -4,4 +4,12 @@
 		<property name="configuration.class" value="net.officefloor.demo.SpringSetup" />
 	</supplier>
 
+	<managed-object source="net.officefloor.r2dbc.R2dbcManagedObjectSource">
+		<property name="driver" value="pool" />
+		<property name="protocol" value="h2:mem" />
+		<property name="database" value="testdb" />
+		<property name="user" value="sa" />
+	</managed-object>
+	<managed-object class="net.officefloor.demo.AsyncMessageRepository" />
+
 </objects>

@@ -1,0 +1,45 @@
+<activity>
+  <inputs>
+    <input name="Cats" argument-type="" x="204" y="67">
+      <procedure name="cats"/>
+    </input>
+    <input name="Imperative" argument-type="" x="181" y="294">
+      <procedure name="imperative"/>
+    </input>
+    <input name="Reactor" argument-type="" x="190" y="151">
+      <procedure name="reactor"/>
+    </input>
+    <input name="ZIO" argument-type="" x="204" y="222">
+      <procedure name="zio"/>
+    </input>
+  </inputs>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="cats" resource="net.officefloor.demo.AsynchronousLogic" source="Class" procedure="cats" x="336" y="58">
+      <next argument-type="net.officefloor.demo.ServerResponse">
+        <output name="Response"/>
+      </next>
+    </procedure>
+    <procedure name="imperative" resource="net.officefloor.demo.AsynchronousLogic" source="Class" procedure="imperative" x="330" y="292">
+      <next argument-type="">
+        <output name="Response"/>
+      </next>
+    </procedure>
+    <procedure name="reactor" resource="net.officefloor.demo.AsynchronousLogic" source="Class" procedure="reactor" x="325" y="143">
+      <next argument-type="net.officefloor.demo.ServerResponse">
+        <output name="Response"/>
+      </next>
+    </procedure>
+    <procedure name="zio" resource="net.officefloor.demo.AsynchronousLogic" source="Class" procedure="zio" x="331" y="221">
+      <next argument-type="net.officefloor.demo.ServerResponse">
+        <output name="Response"/>
+      </next>
+    </procedure>
+  </procedures>
+  <exceptions>
+  </exceptions>
+  <outputs>
+    <output name="Response" parameter-type="" x="545" y="179"/>
+  </outputs>
+</activity>
