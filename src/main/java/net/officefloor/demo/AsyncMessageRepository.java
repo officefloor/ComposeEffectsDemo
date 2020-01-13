@@ -16,11 +16,11 @@ public class AsyncMessageRepository {
 
     public void getMessage(Integer id, Consumer<Either<Throwable, Message>> callback) {
         source.getConnection()
-                .flatMap(connection -> Mono.from(connection.createStatement("SELECT ID, MESSAGE FROM MESSAGE").execute()))
+                .flatMap(connection -> Mono.from(connection.createStatement("SELECT ID, CONTENT FROM MESSAGE").execute()))
                 .map(result -> result.map((row, meta) -> {
                     Message message = new Message();
                     message.setId(row.get("ID", Integer.class));
-                    message.setMessage(row.get("MESSAGE", String.class));
+                    message.setContent(row.get("CONTENT", String.class));
                     return message;
                 }))
                 .flatMap(message -> Mono.from(message))

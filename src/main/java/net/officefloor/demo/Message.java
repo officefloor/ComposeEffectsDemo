@@ -9,7 +9,7 @@ public class Message {
     @Id
     private int id;
 
-    private String message;
+    private String content;
 
     public int getId() {
         return this.id;
@@ -19,11 +19,11 @@ public class Message {
         this.id = id;
     }
 
-    public String getMessage() {
-        return this.message;
+    public String getContent() {
+        return this.content;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setContent(String content) {
+        this.content = content;
     }
 }

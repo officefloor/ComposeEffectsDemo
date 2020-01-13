@@ -8,8 +8,8 @@ object SynchronousLogic {
 
   def cats(request: ServerRequest)(implicit repository: MessageRepository): IO[ServerResponse] =
     for {
-      c <- catsGetMessage(request.getId)
-      response = new ServerResponse(s"${c.getMessage} via Cats")
+      message <- catsGetMessage(request.getId)
+      response = new ServerResponse(s"${message.getContent} via Cats")
     } yield response
 
   def catsGetMessage(id: Int)(implicit repository: MessageRepository): IO[Message] =
@@ -19,8 +19,8 @@ object SynchronousLogic {
   def zio(request: ServerRequest, repository: MessageRepository): ZIO[Any, Throwable, ServerResponse] = {
     // Server logic
     val response = for {
-      z <- zioGetMessage(request.getId)
-      response = new ServerResponse(s"${z.getMessage} via ZIO")
+      message <- zioGetMessage(request.getId)
+      response = new ServerResponse(s"${message.getContent} via ZIO")
     } yield response
 
     // Provide dependencies
@@ -38,7 +38,7 @@ object SynchronousLogic {
 
 
   def reactor(request: ServerRequest)(implicit repository: MessageRepository): Mono[ServerResponse] =
-    reactorGetMessage(request.getId).map(r => new ServerResponse(s"${r.getMessage} via Reactor"))
+    reactorGetMessage(request.getId).map(message => new ServerResponse(s"${message.getContent} via Reactor"))
 
   def reactorGetMessage(id: Int)(implicit repository: MessageRepository): Mono[Message] =
     Mono.fromCallable(() => repository.findById(id).orElseThrow())
@@ -46,7 +46,7 @@ object SynchronousLogic {
 
   def imperative(request: ServerRequest, repository: MessageRepository): ServerResponse = {
     val message = repository.findById(request.getId).orElseThrow()
-    new ServerResponse(s"${message.getMessage} via Imperative")
+    new ServerResponse(s"${message.getContent} via Imperative")
   }
 
 }

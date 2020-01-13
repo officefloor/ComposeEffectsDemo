@@ -10,18 +10,18 @@ object AsynchronousLogic {
   def cats(request: ServerRequest)(implicit repository: AsyncMessageRepository): IO[ServerResponse] =
     for {
       message <- catsGetMessage(request.getId)
-      response = new ServerResponse(s"${message.getMessage} via Cats")
+      response = new ServerResponse(s"${message.getContent} via Cats")
     } yield response
 
   def catsGetMessage(id: Int)(implicit repository: AsyncMessageRepository): IO[Message] =
-    IO.async[Message](callback => repository.getMessage(id, result => callback.apply(result)))
+    IO.async(callback => repository.getMessage(id, result => callback.apply(result)))
 
 
   def zio(request: ServerRequest, repository: AsyncMessageRepository): ZIO[Any, Throwable, ServerResponse] = {
     // Server logic
     val response = for {
       message <- zioGetMessage(request.getId)
-      response = new ServerResponse(s"${message.getMessage} via ZIO")
+      response = new ServerResponse(s"${message.getContent} via ZIO")
     } yield response
 
     // Provide dependencies
@@ -39,7 +39,7 @@ object AsynchronousLogic {
 
 
   def reactor(request: ServerRequest)(implicit repository: AsyncMessageRepository): Mono[ServerResponse] =
-    reactorGetMessage(request.getId).map(message => new ServerResponse(s"${message.getMessage} via Reactor"))
+    reactorGetMessage(request.getId).map(message => new ServerResponse(s"${message.getContent} via Reactor"))
 
   def reactorGetMessage(id: Int)(implicit repository: AsyncMessageRepository): Mono[Message] =
     Mono.create { callback =>
@@ -54,7 +54,7 @@ object AsynchronousLogic {
     val async = context.createAsynchronousFlow()
     repository.getMessage(request.getId, _ match {
       case Left(error) => async.complete(() => throw error)
-      case Right(message) => async.complete(() => context.setNextFunctionArgument(new ServerResponse(s"${message.getMessage} via Imperative")))
+      case Right(message) => async.complete(() => context.setNextFunctionArgument(new ServerResponse(s"${message.getContent} via Imperative")))
     })
   }
 
