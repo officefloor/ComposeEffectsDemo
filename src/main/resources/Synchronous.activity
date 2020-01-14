@@ -1,37 +1,37 @@
 <activity>
   <inputs>
-    <input name="Cats" argument-type="" x="184" y="84">
+    <input name="Cats" argument-type="" x="44" y="19">
       <procedure name="cats"/>
     </input>
-    <input name="Imperative" argument-type="" x="162" y="333">
+    <input name="Imperative" argument-type="" x="22" y="268">
       <procedure name="imperative"/>
     </input>
-    <input name="Reactor" argument-type="" x="174" y="169">
+    <input name="Reactor" argument-type="" x="34" y="104">
       <procedure name="reactor"/>
     </input>
-    <input name="ZIO" argument-type="" x="193" y="254">
+    <input name="ZIO" argument-type="" x="53" y="189">
       <procedure name="zio"/>
     </input>
   </inputs>
   <sections>
   </sections>
   <procedures>
-    <procedure name="cats" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="cats" x="337" y="86">
+    <procedure name="cats" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="cats" x="197" y="21">
       <next argument-type="cats.effect.IO">
         <output name="Response"/>
       </next>
     </procedure>
-    <procedure name="imperative" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="imperative" x="325" y="330">
+    <procedure name="imperative" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="imperative" x="185" y="265">
       <next argument-type="net.officefloor.demo.ServerResponse">
         <output name="Response"/>
       </next>
     </procedure>
-    <procedure name="reactor" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="reactor" x="323" y="170">
+    <procedure name="reactor" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="reactor" x="183" y="105">
       <next argument-type="net.officefloor.demo.ServerResponse">
         <output name="Response"/>
       </next>
     </procedure>
-    <procedure name="zio" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="zio" x="327" y="249">
+    <procedure name="zio" resource="net.officefloor.demo.SynchronousLogic" source="Class" procedure="zio" x="187" y="184">
       <next argument-type="net.officefloor.demo.ServerResponse">
         <output name="Response"/>
       </next>
@@ -40,6 +40,6 @@
   <exceptions>
   </exceptions>
   <outputs>
-    <output name="Response" parameter-type="" x="623" y="195"/>
+    <output name="Response" parameter-type="" x="483" y="130"/>
   </outputs>
 </activity>

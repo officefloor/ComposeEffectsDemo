@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono
 
 object SynchronousLogic {
 
+  // START SNIPPET: cats
   def cats(request: ServerRequest)(implicit repository: MessageRepository): IO[ServerResponse] =
     for {
       message <- catsGetMessage(request.getId)
@@ -14,10 +15,21 @@ object SynchronousLogic {
 
   def catsGetMessage(id: Int)(implicit repository: MessageRepository): IO[Message] =
     IO.apply(repository findById id orElseThrow)
+  // END SNIPPET: cats
 
 
+  // START SNIPPET: reactor
+  def reactor(request: ServerRequest)(implicit repository: MessageRepository): Mono[ServerResponse] =
+    reactorGetMessage(request.getId).map(message => new ServerResponse(s"${message.getContent} via Reactor"))
+
+  def reactorGetMessage(id: Int)(implicit repository: MessageRepository): Mono[Message] =
+    Mono.fromCallable(() => repository.findById(id).orElseThrow())
+  // END SNIPPET: reactor
+
+
+  // START SNIPPET: zio
   def zio(request: ServerRequest, repository: MessageRepository): ZIO[Any, Throwable, ServerResponse] = {
-    // Server logic
+    // Service logic
     val response = for {
       message <- zioGetMessage(request.getId)
       response = new ServerResponse(s"${message.getContent} via ZIO")
@@ -35,18 +47,14 @@ object SynchronousLogic {
   trait InjectMessageRepository {
     val messageRepository: MessageRepository
   }
+  // END SNIPPET: zio
 
 
-  def reactor(request: ServerRequest)(implicit repository: MessageRepository): Mono[ServerResponse] =
-    reactorGetMessage(request.getId).map(message => new ServerResponse(s"${message.getContent} via Reactor"))
-
-  def reactorGetMessage(id: Int)(implicit repository: MessageRepository): Mono[Message] =
-    Mono.fromCallable(() => repository.findById(id).orElseThrow())
-
-
+  // START SNIPPET: imperative
   def imperative(request: ServerRequest, repository: MessageRepository): ServerResponse = {
     val message = repository.findById(request.getId).orElseThrow()
     new ServerResponse(s"${message.getContent} via Imperative")
   }
+  // END SNIPPET: imperative
 
 }

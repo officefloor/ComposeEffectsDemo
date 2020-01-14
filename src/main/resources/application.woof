@@ -1,36 +1,39 @@
 <woof>
   <http-continuations>
+    <http-continuation path="/compose" secure="false" x="63" y="462">
+      <section name="Compose" input="Compose"/>
+    </http-continuation>
   </http-continuations>
   <http-inputs>
-    <http-input path="/async/cats" method="POST" secure="false" x="179" y="367">
+    <http-input path="/async/cats" method="POST" secure="false" x="29" y="249">
       <section name="Asynchronous" input="Cats"/>
     </http-input>
-    <http-input path="/async/imperative" method="POST" secure="false" x="160" y="420">
+    <http-input path="/async/imperative" method="POST" secure="false" x="10" y="302">
       <section name="Asynchronous" input="Imperative"/>
     </http-input>
-    <http-input path="/async/reactor" method="POST" secure="false" x="170" y="473">
+    <http-input path="/async/reactor" method="POST" secure="false" x="20" y="355">
       <section name="Asynchronous" input="Reactor"/>
     </http-input>
-    <http-input path="/async/zio" method="POST" secure="false" x="192" y="517">
+    <http-input path="/async/zio" method="POST" secure="false" x="42" y="399">
       <section name="Asynchronous" input="ZIO"/>
     </http-input>
-    <http-input path="/cats" method="POST" secure="false" x="197" y="99">
+    <http-input path="/cats" method="POST" secure="false" x="58" y="24">
       <section name="Synchronous" input="Cats"/>
     </http-input>
-    <http-input path="/imperative" method="POST" secure="false" x="171" y="152">
+    <http-input path="/imperative" method="POST" secure="false" x="32" y="77">
       <section name="Synchronous" input="Imperative"/>
     </http-input>
-    <http-input path="/reactor" method="POST" secure="false" x="187" y="201">
+    <http-input path="/reactor" method="POST" secure="false" x="48" y="126">
       <section name="Synchronous" input="Reactor"/>
     </http-input>
-    <http-input path="/zio" method="POST" secure="false" x="202" y="247">
+    <http-input path="/zio" method="POST" secure="false" x="63" y="172">
       <section name="Synchronous" input="ZIO"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Asynchronous" source="net.officefloor.activity.ActivitySectionSource" location="Asynchronous.activity" x="446" y="374">
+    <section name="Asynchronous" source="net.officefloor.activity.ActivitySectionSource" location="Asynchronous.activity" x="296" y="256">
       <input name="Cats" parameter-type=""/>
       <input name="Imperative" parameter-type=""/>
       <input name="Reactor" parameter-type=""/>
@@ -39,7 +42,13 @@
         <procedure name="send"/>
       </output>
     </section>
-    <section name="Synchronous" source="net.officefloor.activity.ActivitySectionSource" location="Synchronous.activity" x="433" y="133">
+    <section name="Compose" source="net.officefloor.activity.ActivitySectionSource" location="Compose.activity" x="295" y="444">
+      <input name="Compose" parameter-type=""/>
+      <output name="Response" argument-type="">
+        <procedure name="send"/>
+      </output>
+    </section>
+    <section name="Synchronous" source="net.officefloor.activity.ActivitySectionSource" location="Synchronous.activity" x="294" y="58">
       <input name="Cats" parameter-type=""/>
       <input name="Imperative" parameter-type=""/>
       <input name="Reactor" parameter-type=""/>
@@ -50,7 +59,7 @@
     </section>
   </sections>
   <procedures>
-    <procedure name="send" resource="net.officefloor.demo.Send" source="Class" procedure="send" x="727" y="147">
+    <procedure name="send" resource="net.officefloor.demo.Send" source="Class" procedure="send" x="705" y="265">
       <next argument-type="">
       </next>
     </procedure>

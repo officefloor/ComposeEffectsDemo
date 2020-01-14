@@ -1,0 +1,46 @@
+<activity>
+  <inputs>
+    <input name="Compose" argument-type="" x="14" y="27">
+      <procedure name="seed"/>
+    </input>
+  </inputs>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="cats" resource="net.officefloor.demo.ComposeLogic" source="Class" procedure="cats" x="255" y="25">
+      <next argument-type="java.lang.String">
+        <procedure name="reactor"/>
+      </next>
+    </procedure>
+    <procedure name="imperative" resource="net.officefloor.demo.ComposeLogic" source="Class" procedure="imperative" x="621" y="26">
+      <next argument-type="java.lang.String">
+        <procedure name="response"/>
+      </next>
+    </procedure>
+    <procedure name="reactor" resource="net.officefloor.demo.ComposeLogic" source="Class" procedure="reactor" x="371" y="25">
+      <next argument-type="java.lang.String">
+        <procedure name="zio"/>
+      </next>
+    </procedure>
+    <procedure name="response" resource="net.officefloor.demo.ComposeLogic" source="Class" procedure="response" x="792" y="25">
+      <next argument-type="net.officefloor.demo.ServerResponse">
+        <output name="Response"/>
+      </next>
+    </procedure>
+    <procedure name="seed" resource="net.officefloor.demo.ComposeLogic" source="Class" procedure="seed" x="128" y="25">
+      <next argument-type="java.lang.String">
+        <procedure name="cats"/>
+      </next>
+    </procedure>
+    <procedure name="zio" resource="net.officefloor.demo.ComposeLogic" source="Class" procedure="zio" x="513" y="25">
+      <next argument-type="java.lang.String">
+        <procedure name="imperative"/>
+      </next>
+    </procedure>
+  </procedures>
+  <exceptions>
+  </exceptions>
+  <outputs>
+    <output name="Response" parameter-type="" x="954" y="28"/>
+  </outputs>
+</activity>

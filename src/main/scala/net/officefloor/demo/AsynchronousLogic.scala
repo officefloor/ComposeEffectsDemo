@@ -7,6 +7,7 @@ import zio.ZIO
 
 object AsynchronousLogic {
 
+  // START SNIPPET: async
   def cats(request: ServerRequest)(implicit repository: AsyncMessageRepository): IO[ServerResponse] =
     for {
       message <- catsGetMessage(request.getId)
@@ -57,5 +58,6 @@ object AsynchronousLogic {
       case Right(message) => async.complete(() => context.setNextFunctionArgument(new ServerResponse(s"${message.getContent} via Imperative")))
     })
   }
+  // END SNIPPET: async
 
 }

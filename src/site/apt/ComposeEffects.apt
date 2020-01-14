@@ -10,15 +10,127 @@ compose Cats, Reactor, ZIO, ... Effects
 
   The previous articles covered:
 
-   * First-Class Procedure type system
+   * {{{https://sagenschneider.blogspot.com/2019/11/first-class-procedure-type-system-for.html}First-Class Procedure type system}}
    
-   * First-Class Module
+   * {{{https://sagenschneider.blogspot.com/2019/12/first-class-module-type-system-for.html}First-Class Module}}
    
   This article will look at taking the theory into practice.  It will use the concepts to build an application composing Effects from various Effect libraries.
 
   Note that the Effects used is kept deliberately simple to focus on the composition of the effects.  This is mainly because this article is not to compare libraries.  This article is to compose them.  We show how using Inversion of Coupling Control they can be seamlessly composed together in a simple application.  Also, order of discussing the libraries is nothing more than alphabetical.
 
+  To keep matters simple the effect will be retrieving a message from the database.
+
 
 *Cats
 
-  Let's begin with Cats Effect.
+  Let's begin with {{{https://typelevel.org/cats-effect/}Cats Effect}}.
+  
+%{snippet|id=cats|file=./src/main/scala/net/officefloor/demo/SynchronousLogic.scala|ignoreDownloadError=false}
+
+  The <<<catsGetMessage>>> function wraps the repository retrieving message effect within an <<<IO>>>.   This can then be used to service the request to provide a response (as per the <<<cats>>> function).
+  
+  The use of implicit may be overkill for the single <<<repository>>> dependency.  However, it shows how dependency injection can remove dependency clutter from the servicing logic.  This is especially useful when the number of dependencies grows.
+  
+
+*Reactor
+
+  {{{https://projectreactor.io/}Reactor}} has the following servicing logic.
+  
+%{snippet|id=reactor|file=./src/main/scala/net/officefloor/demo/SynchronousLogic.scala|ignoreDownloadError=false}
+  
+  Again, there is a <<<reactorGetMessage>>> function wrapping the retrieving message effect into a <<<Mono>>>.  This is then used to service the request.
+  
+
+*ZIO
+
+  For {{{https://zio.dev/}ZIO}} the logic is slightly different, as ZIO provides it's own dependency injection.
+  
+%{snippet|id=zio|file=./src/main/scala/net/officefloor/demo/SynchronousLogic.scala|ignoreDownloadError=false}
+
+  The <<<zioGetMessage>>> again wraps the retrieve database message effect within a <<<ZIO>>>.  However, it extracts the injected trait to retrieve the repository.
+  
+  
+*Encapsulating into a Module
+
+  The above functions (<<<cats>>>, <<<reactor>>>, <<<zio>>>) are configured as First-Class Procedures into the following Module.
+  
+[./images/SynchronousModule.png] Synchronous Module.
+
+  This module has an output being the <<<Response>>> with inputs <<<Cats>>>, <<<Reactor>>>, <<<ZIO>>> and <<<Imperative>>>.
+  
+  As First-Class Procedures are lazily evaluated they can also wrap imperative code containing effects.  The <<<imperative>>> function is the following.
+  
+%{snippet|id=imperative|file=./src/main/scala/net/officefloor/demo/SynchronousLogic.scala|ignoreDownloadError=false}
+
+
+*Using the Module
+
+  The following configuration uses the module to service REST requests.  It is configured as the <<<Synchronous>>> module.
+  
+[./images/Server.png] Synchronous Server.
+
+  This demonstrates how easy it is to configure the module into servicing requests.
+  
+  What is further interesting is the <<<Asynchronous>>> module has the same interface of inputs/outputs as the <<<Synchronous>>> module.  Now, this could quite possibly be the above module re-used (just badly named).   However, it is not.  The <<<Asynchronous>>> module undertakes the same logic, but just asynchronously (code at end of article).
+    
+  What is important for modules is the contractual interface of inputs and outputs.  We could quite happily swap the <<<Synchronous>>> / <<<Asynchronous>>> modules around in the configuration and the application will still continue to work.  This allows the complexity to be encapsulated.
+  
+  A more real world example is we could start out with the quicker to write and easier to debug synchronous effects.  Then as the application grows in scale, we may decide to swap in an asynchronous module to better handle scale.  The amount of refactoring to swap the <<<Synchronous>>> module to the <<<Asynchronous>>> module would be:
+
+   [[1]] Drop in new <<<Asynchronous>>> module
+   
+   [[1]] Re-wire flows to the <<<Asynchronous>>> module
+   
+   [[1]] Delete the <<<Synchronous>>> module
+   
+  As {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}} removes the function coupling, there is no code to change except providing the implementation of the new module.
+  
+  With modules able to contain modules, this provides a means to encapsulate complexity of the application for easier comprehension.  It also makes importing modules simple.  Drop them in and wire them up.  And is especially useful when libraries of third party modules are available for composition of ready to use functionality.  
+  
+
+*Composing Effects
+
+  This demonstrates First-Class Procedures and First-Class Modules of the previous articles in this series.
+  
+  Hey, but this article promised composing effects!
+  
+  Well I could tell you the send is an effect and that composing this after the above effects is that composition.   However, that's taking a lot of my word for it.
+  
+  Therefore, the last module in the server configuration is the following.
+  
+[./images/ComposeModule.png] Compose Module.
+  
+  This module composes an effect from each of the libraries.  The code for each effect is the following.
+  
+%{snippet|id=compose|file=./src/main/scala/net/officefloor/demo/ComposeLogic.scala|ignoreDownloadError=false}
+
+  Each effect just takes the input of the previous and appends it's library name.  The resulting response is a string containing all the effect library names.
+  
+
+*No adapters
+
+  Astute readers may be thinking that under the hood of {{{http://officefloor.net}OfficeFloor}} there may be some fabulous adapters between the libraries.  Hmmm, can we extract these and make use of them?
+  
+  Sadly and for that matter quite happily there are no adapters between the libraries.  What actually happens is that each First-Class Procedure unsafely executes its effect and retrieves the resulting output.  With the output OfficeFloor then invokes the next First-Class Procedure.  By doing so, we do not need to adapt the libraries with each other.  We can run each effect in isolation and interface them via their typed inputs/outputs.
+  
+  This makes integration of new effect libraries very simple.  Just write a once off adapter to encapsulate the library's effects within a First-Class Procedure.  The effect library is then able to integration with all the other effect libraries.  As First-Class Procedures are actually a specialised First-Class Module, this demonstrates the composition capabilities of Inversion of Coupling Control.
+
+
+*Summary
+
+  This article has been code and configuration heavy to demonstrate how First-Class Procedures and First-Class Modules compose.
+  
+  It has demonstrated that the type system of Inversion of Coupling Control makes composition easy (essentially drawing lines).
+  
+  Now you need not take my word on the code examples in this article.  They are extracted from the demonstration project you can clone and run yourself (found at {{https://github.com/officefloor/ComposeEffectsDemo}}).
+  
+  Also, if I've missed your favourite effects library please excuse me.  I'm happy, if enough interest, to work with you incorporate adapters to provide further demonstration of integrating the beloved effect library.  Focus of OfficeFloor is not to be opinionated but rather provide an open platform to integrate software.
+
+  The next article in the series tests my self taught mathematics to attempt to explain the underlying model of why this ease of composition is possible.   
+  
+
+*Asynchronous Module
+
+  Code for the <<<Asynchronous>>> module referenced earlier in the article.
+
+%{snippet|id=async|file=./src/main/scala/net/officefloor/demo/AsynchronousLogic.scala|ignoreDownloadError=false}
