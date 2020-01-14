@@ -1,0 +1,24 @@
+				       ------------------
+	         compose Cats, Reactor, ZIO, ... Effects
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+compose Cats, Reactor, ZIO, ... Effects
+
+  This is the third in a series of articles looking at the type system for Inversion of Coupling Control to provide composition.
+
+  The previous articles covered:
+
+   * First-Class Procedure type system
+   
+   * First-Class Module
+   
+  This article will look at taking the theory into practice.  It will use the concepts to build an application composing Effects from various Effect libraries.
+
+  Note that the Effects used is kept deliberately simple to focus on the composition of the effects.  This is mainly because this article is not to compare libraries.  This article is to compose them.  We show how using Inversion of Coupling Control they can be seamlessly composed together in a simple application.  Also, order of discussing the libraries is nothing more than alphabetical.
+
+
+*Cats
+
+  Let's begin with Cats Effect.
