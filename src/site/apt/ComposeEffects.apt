@@ -71,7 +71,7 @@ compose Cats, Reactor, ZIO, ... Effects
 
   This demonstrates how easy it is to configure the module into servicing requests.
   
-  What is further interesting is the <<<Asynchronous>>> module has the same interface of inputs/outputs as the <<<Synchronous>>> module.  Now, this could quite possibly be the above module re-used (just badly named).   However, it is not.  The <<<Asynchronous>>> module undertakes the same logic, but just asynchronously (code at end of article).
+  What is further interesting is the <<<Asynchronous>>> module has the same interface of inputs/outputs as the <<<Synchronous>>> module.  Now, this could quite possibly be the above module re-used (just badly named).   However, it is not.  The <<<Asynchronous>>> module undertakes the same logic, but just asynchronously ({{{https://github.com/officefloor/ComposeEffectsDemo/blob/master/src/main/scala/net/officefloor/demo/AsynchronousLogic.scala}code available in demo project}}).
     
   What is important for modules is the contractual interface of inputs and outputs.  We could quite happily swap the <<<Synchronous>>> / <<<Asynchronous>>> modules around in the configuration and the application will still continue to work.  This allows the complexity to be encapsulated.
   
@@ -124,13 +124,7 @@ compose Cats, Reactor, ZIO, ... Effects
   
   Now you need not take my word on the code examples in this article.  They are extracted from the demonstration project you can clone and run yourself (found at {{https://github.com/officefloor/ComposeEffectsDemo}}).
   
-  Also, if I've missed your favourite effects library please excuse me.  I'm happy, if enough interest, to work with you incorporate adapters to provide further demonstration of integrating the beloved effect library.  Focus of OfficeFloor is not to be opinionated but rather provide an open platform to integrate software.
+  Also, if we've missed your favourite effects library please excuse me.  We're happy, if enough interest, to work with you incorporate adapters to provide further demonstration of integrating the beloved effect library.  Focus of OfficeFloor is not to be opinionated but rather provide an open platform to integrate software.
 
   The next article in the series tests my self taught mathematics to attempt to explain the underlying model of why this ease of composition is possible.   
   
-
-*Asynchronous Module
-
-  Code for the <<<Asynchronous>>> module referenced earlier in the article.
-
-%{snippet|id=async|file=./src/main/scala/net/officefloor/demo/AsynchronousLogic.scala|ignoreDownloadError=false}
