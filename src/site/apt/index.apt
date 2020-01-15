@@ -5,3 +5,5 @@
 				       ------------------
 
   {{{./ComposeEffects.html}Compose Effects}}
+
+  {{{./MonadCpsProcessThread.html}Monad with CPS provides Process/Thread model}}
