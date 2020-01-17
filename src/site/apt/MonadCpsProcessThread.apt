@@ -1,12 +1,12 @@
 				       ------------------
-	         Monad with CPS provides Process/Thread model
+	         Monad with IoCC provides Process/Thread model
 				       ------------------
 				      Daniel Sagenschneider
 				       ------------------
 
-Monad with CPS provides Process/Thread model
+Monad with IoCC provides Process/Thread model
 
-  This is the final article in the series on looking at Inversion of Coupling Control composition.  The previous articles covered:
+  This is the final article in the series on looking at Inversion of Coupling Control (IoCC) composition.  The previous articles covered:
 
     * {{{https://sagenschneider.blogspot.com/2019/11/first-class-procedure-type-system-for.html}First-Class Procedure type system}}
 
@@ -16,15 +16,15 @@ Monad with CPS provides Process/Thread model
 
   This article looks at providing a mathematical model to explain the composition.
 
-  Just a little disclaimer that I'm not a mathematics boffin.  Beyond degrees in computer science that did not cover much functional programming, much of this is attempt is through my self taught understanding of mathematics.  Therefore, I'm happy to take feedback from more capable mathematicians on better ways to express the model.  However, I'm hoping this article conveys enough of the underlying model for composition of Inversion of Coupling Control.
+  Just a little disclaimer that I'm not a mathematics boffin.  I've a degree in computer science but it did not cover much functional programming. Much of this is through my self taught understanding of mathematics.  Therefore, I'm happy to take feedback from more capable mathematicians on better ways to express the model.  However, I'm hoping this article conveys enough of the theoretical underlying model for composition of Inversion of Coupling Control.
 
-  Now from Category Theory, we have the associative law:
+  From Category Theory, we have the associative law:
 
 +----------
   f(x) . g(x) = f.g(x)
 +----------
 
-  From this we can introduce dependencies:
+  With this we can introduce dependencies:
 
 +----------
   f(x)(d1) . g(x)(d2) = f.g(x)(d1, d2)
@@ -36,7 +36,7 @@ Monad with CPS provides Process/Thread model
 
   This makes the program very rigid, as changing d1 to d3 has significant impact for use of f(x)(d1 now d3).  For example, switching from database connection to REST end point.
 
-  ZIO attempts to reduce the rigidity by the following:
+  {{{https://zio.dev/}ZIO}} attempts to reduce the rigidity by the following:
 
 +----------
   f(x)(d1) . g(x)(d2) = f.g(x)(D)
@@ -54,11 +54,11 @@ Monad with CPS provides Process/Thread model
 
   Now, I'd like to take another tact to the problem.
 
-  The {{{https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf}Imperative Functional Programming}} paper could not see how to remove the continuation type (z) from the signature.   The authors did conclude monads and CPS very similar, but due to the extra continuation type on the signature and the author's intuition that the IO Monad was the direction forward.
+  The {{{https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf}Imperative Functional Programming}} paper could not see how to remove the continuation type (z) from the signature. The authors did conclude monads and CPS very similar, but due to the extra continuation type on the signature and the author's intuition that the IO Monad was the direction forward.
 
-  Now I certainly am not taking the tact that replace IO Monad with CPS.   I'm looking to create a complementary model.
+  Now I certainly am not taking the tact to replace IO Monad with CPS. I'm looking to create a complementary model. A model where continuations decouple the IO monads.
 
-  So introducing dependencies to IO Monad, we get:
+  So introducing dependencies to the IO Monad, we get:
 
 +----------
   IO[x](d)
@@ -84,26 +84,54 @@ Monad with CPS provides Process/Thread model
    z = Either[Throwable,x] -> Unit
 -----------
 
-  The pesky z that Imperative Functional Programming paper was talking about.
+  The pesky z that the Imperative Functional Programming paper was talking about.
 
-  However, discussed previously is {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Continuation Injection}} .  This effectively hides the z from the signature, making it an injected function. As it's an injected function, the z becomes an indirection to another function. This indirection can be represented as:
+  However, discussed previously is {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Continuation Injection}}. This effectively hides the z from the signature, making it an injected function. As it's an injected function, the z becomes an indirection to another function. This indirection can be represented as:
 
 +----------
   IO[_](d1) -> (Either[Throwable,y] -> IO[y](d2)) -> IO[y](d2)
 +----------
 
-  Note: the joined IO need only handle y or any of it's super types.   Hence, the relationship indicates the passed type.   This makes it easy to inject in another IO for handling the continuation.
+  Note: the joined IO need only handle y or any of it's super types. Hence, the relationship indicates the passed type. This makes it easy to inject in another IO for handling the continuation.
 
-  Furthermore, we can model dependency injection with:
-
-+----------
-  F[_](d) -> D[F[_]]
-+----------
-
-  So the above becomes:
+  Now to start isolating the IO monads from each other, we are going to start with {{{https://sagenschneider.blogspot.com/2019/02/is-spring-reactive-already-obsolete.html}Thread Injection}}.
 
 +----------
-  D[IO[_]] -> (Either[Throwable,y] -> IO[y](d)) -> D[IO[y]]
+  d -> Executor
++----------
+  
+  This represents Thread Injection choosing the appropriate Executor from the dependencies.  Therefore, we can then introduce a Thread Injection monad to choose the Executor.
+
++----------
+  F[_](d)(Executor) -> (d -> Executor) -> TI[F[_](d)] 
++----------
+-----------
+  where
+    TI is the Thread Injection monad that contains the dependency to Executor mapping to enable executing the IO monad with the appropriate Executor.
+-----------
+  
+  This then has the above continuation between IO monads relationship become.
+  
++----------
+  TI[IO[_](d1)] -> (Either[Throwable,y] -> IO[y](d2)(Executor)) -> TI[IO[y](d2)]
++----------
+  
+  Now the IO monads can be executed by the appropriate Executor via the TI monad.
+     
+  Further to this, we can model dependency injection with:
+
++----------
+  F[_](d) -> (F[_](d) -> f()) -> DI[F[_]]
++----------
+-----------
+  where
+    DI is the Dependency Injection monad that supplies dependencies to the function.
+-----------
+
+  So the above IO monad continuation relationship becomes:
+
++----------
+  TI[DI[IO[_]]] -> (Either[Throwable,y] -> IO[y](d)(Executor)) -> TI[DI[IO[y]]]
 +----------
 -----------
   where:
@@ -113,19 +141,19 @@ Monad with CPS provides Process/Thread model
   Now, with Continuation Injection we are not limited to injecting in only one continuation.  We can inject in many:
 
 +----------
-  D[IO[_]] -> (Either[Throwable,y] -> IO[y](d)) -> D[IO[y]]
-           -> (Either[Throwable,w] -> IO[w](d)) -> D[IO[w]]
-           ...
+  TI[DI[IO[_]]] -> (Either[Throwable,y] -> IO[y](d)(Executor)) -> TI[DI[IO[y]]]
+                -> (Either[Throwable,w] -> IO[w](d)(Executor)) -> TI[DI[IO[w]]]
+                ...
 +----------
 
-  Note: I'm guessing this can be represented on a single line (possible as set of CPS from a particular IO) but I'll leave that to a boffin more mathematical than me.
+  Note: I'm guessing this can be represented on a single line (possible as set of continuations from a particular IO) but I'll leave that to a boffin more mathematical than me.
 
   This means we can remove the Either and have the (possibly many) exceptions handled by separate continuations to get:
 
 +----------
-  D[IO[_]] -> (y -> IO[y](d)) -> D[IO[y]]
-           -> (ex -> IO[ex](d)) -> D[IO[ex]]
-           ...
+  TI[DI[IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[IO[y]]]
+                -> (ex -> IO[ex](d)(Executor)) -> TI[DI[IO[ex]]]
+                ...
 +----------
 
   This demonstrates that an IO may now actually have more than one output. By having the ability to inject multiple continuations, the IO is capable of multiple outputs.
@@ -138,50 +166,66 @@ Monad with CPS provides Process/Thread model
 
   which, is essentially the OfficeFloor Continuation Injection configuration.
 
-  Further to this we can qualify D. Originally we had d1, d2 that was hidden by D. We can qualify the scope of D as follows:
+  Further to this we can qualify DI. Originally we had d1, d2 that was hidden by DI. We can qualify the scope of DI as follows:
 
 +----------
-  Dp,t[_]
+  DI[P,T,_]
 +----------
 -----------
   where:
-    p is the set of process dependency instances
-    t is the set of thread dependency instances
+    P is the set of process dependency instances
+    T is the set of thread dependency instances
 -----------
 
-  This allows for the following:
+  This allows for the following.
 
 -----------
-  Same thread = Dp,t[_] -> Dp,t[_]
-  Spawned thread = Dp,t[_] -> Dp,s[_]
-  New process = Dp,t[_] -> Dq,s[_]
+  Same thread = DI[P,T,_] -> (_ -> F[_](d)) -> DI[P,T,_]
+  Spawned thread = DI[P,T,_] -> (_ -> F[_](d)) -> DI[P,S,_]
+  New process = DI[P,T,_] -> (_ -> F[_](d)) -> DI[Q,S,_]
 -----------
 
   In other words,
 
    * spawning a thread is creating a new set of thread dependencies instances
 
-   * interprocess communication is different set of process dependency instances
+   * interprocess communication is a different set of process dependency instances
 
   Further to this:
 
-   * the set of t may only be the same if the set of p is same
+   * the set of T may only be the same if the set of P is same
 
-   * context (eg transactions) apply only to dependencies in t
+   * context (eg transactions) apply only to dependencies in T
 
-  This model is already implemented in OfficeFloor as part of its Inversion of Coupling Control implementation.
+  The resulting IO monad relationship for a same thread continuation becomes.
+  
++----------
+  TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[P,T,IO[y]]]
++----------
+  
+  while a spawned thread continuation relationship is modeled as follows.
+  
++----------
+  TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[P,S,IO[y]]]
++----------
+  
+  What this essentially allows is multi-threading concurrency within the directed configuration graph. Any continuation may spawn a new thread by starting a new set of thread dependencies. Furthermore, OfficeFloor will asynchronously process the continuation returning control immediately. This has the effect of spawning a thread.
+  
+  The same goes for spawning a new process.
 
-  What this essentially allows is multi-threading concurrency with the directed configuration graph. Any continuation may spawn a new thread by starting a new set of thread dependencies. Furthermore, OfficeFloor will asynchronously process the continuation returning control immediately. This has the effect of spawning a thread.
++----------
+  TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[Q,S,IO[y]]]
++----------
 
-  Therefore, with OfficeFloor, threading is a configuration not a programming problem. Developers are no longer required to code thread safety into their possible imperative code within the IO. As the seldom used process dependencies are coded thread safe, it introduces the ability for mutability within the IO that is thread safe. The isolation of dependencies prevents memory corruption (assuming dependencies respect not sharing static state).
+  Therefore, with OfficeFloor, processes and threading are a configuration not a programming problem. Developers are no longer required to code thread safety into their possible imperative code within the IO. As the seldom used process dependencies are coded thread safe, this relationship introduces the ability for mutability within the IO that is thread safe. The isolation of dependencies prevents memory corruption (assuming dependencies respect not sharing static state).
 
-  OfficeFloor (Inversion of Coupling Control) in this sense is possibly the dark side. Functional programming strives for purity of functions being the light. Given OfficeFloor can handle:
+  OfficeFloor (Inversion of Coupling Control) is in this sense possibly the dark side. Functional programming strives for purity of functions being the light. Given OfficeFloor can handle:
 
    * multiple outputs from IOs including exceptions as continuations
 
    * mutability within the IOs that is thread safe
 
-  it enables modelling the darker impurities (or maybe I just watch too much StarWars).
+  it enables modeling the darker impurities (or maybe I just watch too much StarWars).
 
 
 Summary
@@ -205,15 +249,23 @@ Future Work
 
    * the directed graph of continuations
 
-   * isolating sub graphs by the process/thread dependency rules
+   * isolating sub graphs by the process (and possibly thread) dependency rules
 
    * identifying which sub graphs to isolate to another container by incorporating run time metrics of the IOs
 
   Note that we can model interprocess communication as:
 
 +----------
-  Async (e.g. queue) = Dp,t[_] -> Dq,s[IO[message]] -> Unit
-  Sync (e.g. REST)  = Dpt[_] -> Dq,s[IO[request]] -> Dp,t[IO[response]]
+  Async (e.g. queue) = DI[P,T,_] -> (message -> F[_](d)) -> DI[Q,S,_] -> ()
+  Sync (e.g. REST)  = D[P,T,_] -> (request -> F[_](d)) -> D[Q,S,_] -> (response -> G[_](d)) -> D[P,T,_]
 +----------
 
-  This can provide type safe modelling of distributing the IOs within the directed continuation graph.
+  This can provide type safe modeling of distributing the IOs within the directed continuation graph.
+    
+  Note that we may have to mark dependency instances that carry non-replicatable state between IO monads.  In other words, a database connection (not in transactional context) can be replicated by obtaining another database connection from the pool.  However, a dependency that stores some value in it from one IO monad that is used by the next IO monad is non-replicable.
+  
+  In practice, this has only been variable dependencies to further remove the parameter coupling between IO monads (see {{{http://officefloor.net/tutorials/}OfficeFloor tutorials}}).
+  
+  However, we are also finding in practice that it is relatively intuitive to find sub graphs to isolate to their own containers.  Endeavours in this work will likely look at automation of dynamically isolated sub graphs to containers as load changes (effectively having selective elastic scale of functions not arbitrarily scoped microservices).
+  
+  
