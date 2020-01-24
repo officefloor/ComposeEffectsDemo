@@ -16,7 +16,7 @@ Monad with IoCC provides Process/Thread model
 
   This article looks at providing a mathematical model to explain the composition.
 
-  Just a little disclaimer that I'm not a mathematics boffin.  I've a degree in computer science but it did not cover much functional programming. Much of this is through my self taught understanding of mathematics.  Therefore, I'm happy to take feedback from more capable mathematicians on better ways to express the model.  However, I'm hoping this article conveys enough of the theoretical underlying model for composition of Inversion of Coupling Control.
+  Just a little disclaimer that I'm not a mathematics boffin.  I've a degree in computer science but it did not cover much functional programming. Much of this is through my self taught understanding of functional programming and mathematics.  Therefore, I'm happy to take feedback from more capable mathematicians on better ways to express the model.  However, I'm hoping this article reasonably conveys the underlying model for composition with Inversion of Coupling Control.
 
   From Category Theory, we have the associative law:
 
@@ -50,7 +50,7 @@ Monad with IoCC provides Process/Thread model
 
   Now, we can create lots of morphisms and at execution of resulting ZIO, provide a hom(D), which is the set of all required dependencies.
 
-  So, this model works.  It is certainly enabling boiler plate code of dependencies to be removed from your programs.
+  So, this model works.  It is certainly enabling injection of dependencies in functional programs.
 
   Now, I'd like to take another tact to the problem.
 
@@ -116,19 +116,19 @@ Monad with IoCC provides Process/Thread model
   TI[IO[_](d1)] -> (Either[Throwable,y] -> IO[y](d2)(Executor)) -> TI[IO[y](d2)]
 +----------
   
-  Now the IO monads can be executed by the appropriate Executor via the TI monad.
+  Now the IO Monads can be executed by the appropriate Executor via the TI Monad.
      
   Further to this, we can model dependency injection with:
 
 +----------
-  F[_](d) -> (F[_](d) -> f()) -> DI[F[_]]
+  F[_](d) -> (F[_](d) -> F[_]) -> DI[F[_]]
 +----------
 -----------
   where
     DI is the Dependency Injection monad that supplies dependencies to the function.
 -----------
 
-  So the above IO monad continuation relationship becomes:
+  So the above IO Monad continuation relationship becomes:
 
 +----------
   TI[DI[IO[_]]] -> (Either[Throwable,y] -> IO[y](d)(Executor)) -> TI[DI[IO[y]]]
@@ -159,12 +159,6 @@ Monad with IoCC provides Process/Thread model
   This demonstrates that an IO may now actually have more than one output. By having the ability to inject multiple continuations, the IO is capable of multiple outputs.
 
   It is also execution safe.  {{{http://officefloor.net}OfficeFloor}} (Inversion of Coupling Control) ensures the handling of one continuation completes before the next continuation begins executing. This ensures only one IO is ever being executed at one time.
-
-  What we now have is a typed model that can be represented as a directed graph of interactions:
-
-{TODO diagram}
-
-  which, is essentially the OfficeFloor Continuation Injection configuration.
 
   Further to this we can qualify DI. Originally we had d1, d2 that was hidden by DI. We can qualify the scope of DI as follows:
 
@@ -209,7 +203,7 @@ Monad with IoCC provides Process/Thread model
   TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[P,S,IO[y]]]
 +----------
   
-  What this essentially allows is multi-threading concurrency within the directed configuration graph. Any continuation may spawn a new thread by starting a new set of thread dependencies. Furthermore, OfficeFloor will asynchronously process the continuation returning control immediately. This has the effect of spawning a thread.
+  What this essentially allows is multi-threading concurrency. Any continuation may spawn a new thread by starting a new set of thread dependencies. Furthermore, OfficeFloor will asynchronously process the continuation returning control immediately. This has the effect of spawning a thread.
   
   The same goes for spawning a new process.
 
@@ -226,13 +220,37 @@ Monad with IoCC provides Process/Thread model
    * mutability within the IOs that is thread safe
 
   it enables modeling the darker impurities (or maybe I just watch too much StarWars).
+  
+  What we now have is a possible "inversion" of the function:
+  
+    * Function: strives to be pure, may have multiple inputs and only a single output.  I like to think of functions like machines - tools providing always predictable outputs.
+    
+    * IoCC: allows impurities, has a single input and may have multiple outputs.  I like to think of IoCC like signals - mostly predictable outputs, which is more similar to organic structures.
+
+  Regardless, we now have a typed model that can be represented as a directed graph of interactions. The IO Monads are the nodes with the various continuations edges between them. An edge in the graph is qualified as follows.
+  
++----------
+  TI[DI[IO]] == y,p,t ==> TI[DI[IO]]
++----------
+-----------
+  where:
+    y indicates the data type provided to the continuation
+    p indicates if a new process is spawned (represented as 0 for no and 1 for yes)
+    t indicates if a new thread is spawned (again represented as 0 for no and 1 for yes)
+-----------
+
+  The result is the following example graph.
+
+[./images/DirectedGraph.png] Directed Graph.
+
+  which, is essentially the OfficeFloor Continuation Injection configuration.
 
 
 Summary
 
-  All the above is already implemented in OfficeFloor.
+  All of the above is already implemented in {{{http://officefloor.net}OfficeFloor}}.
 
-  The previous articles demonstrated the type system of Inversion of Coupling Control to enable composition. The type system also enabled encapsulation in First-Class Modules for easy assembly and comprehension of OfficeFloor applications. This was then demonstrated with a simple example application.
+  The previous articles demonstrated the {{{https://sagenschneider.blogspot.com/2019/11/first-class-procedure-type-system-for.html}type system of Inversion of Coupling Control}} to enable composition. The type system also enabled {{{https://sagenschneider.blogspot.com/2019/12/first-class-module-type-system-for.html}encapsulation in First-Class Modules}} for easy assembly and comprehension of OfficeFloor applications. This was then demonstrated with a {{{https://sagenschneider.blogspot.com/2020/01/compose-cats-reactor-zio-effects.html}simple example application}}.
 
   What this article has attempted to cover is the core underlying model. It has looked at how injected continuations can be used to join together IO instances. Further, it looked at the dependencies and how they can be used to model processes and threads.
 
