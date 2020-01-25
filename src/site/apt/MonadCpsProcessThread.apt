@@ -54,7 +54,7 @@ Monad with IoCC provides Process/Thread model
 
   Now, I'd like to take another tact to the problem.
 
-  The {{{https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf}Imperative Functional Programming}} paper could not see how to remove the continuation type (z) from the signature. The authors did conclude Monads and CPS very similar, but due to the extra continuation type on the signature and the author's intuition that the IO Monad was the direction forward.
+  The {{{https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf}Imperative Functional Programming}} paper could not see how to remove the continuation type (z) from the signature. The authors did conclude Monads and CPS very similar, but due to the extra continuation type on the signature and the author's intuition, the IO Monad was the direction forward.
 
   Now I certainly am not taking the tact to replace IO Monad with CPS. I'm looking to create a complementary model. A model where continuations decouple the IO Monads.
 
@@ -68,10 +68,10 @@ Monad with IoCC provides Process/Thread model
     d is the set of dependencies required
 -----------
 
-  this then follows, that joining two IO together we get:
+  This then follows, that joining two IO together we get:
 
 +----------
- IO[x](d1, d2)
+  IO[x](d1, d2)
 +----------
 
   So, maybe let's keep the IO Monad's separate and join them via CPS.   This changes the signature to:
@@ -81,7 +81,7 @@ Monad with IoCC provides Process/Thread model
 +----------
 -----------
   where:
-   z = Either[Throwable,x] -> Unit
+    z = Either[Throwable,x] -> Unit
 -----------
 
   The pesky z that the Imperative Functional Programming paper was talking about.
@@ -199,7 +199,7 @@ Monad with IoCC provides Process/Thread model
   TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[P,T,IO[y]]]
 +----------
   
-  while a spawned thread continuation relationship is modeled as follows.
+  while a spawned thread continuation relationship is modelled as follows.
   
 +----------
   TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[P,S,IO[y]]]
@@ -221,7 +221,7 @@ Monad with IoCC provides Process/Thread model
 
    * mutability within the IOs that is thread safe
 
-  it enables modeling the darker impurities (or maybe I just watch too much StarWars).
+  OfficeFloor enables modeling the darker impurities (or maybe I just watch too much StarWars).
   
   What we now have is a possible "inversion" of the function:
   
@@ -290,6 +290,6 @@ Future Work
   
   In practice, this has only been variable dependencies to further remove the parameter coupling between IO Monads (see {{{http://officefloor.net/tutorials/}OfficeFloor tutorials}}).
   
-  However, we are also finding in practice that it is relatively intuitive to find sub graphs to isolate to their own containers.  Endeavours in this work will likely look at automation of dynamically isolated sub graphs to containers as load changes (effectively having selective elastic scale of functions not arbitrarily scoped microservices).
+  However, we are also finding in practice that it is relatively intuitive to find sub graphs to isolate to their own containers.  Endeavours in this work will likely look at automation of dynamically isolating sub graphs to containers as load changes (effectively having selective elastic scale of functions not arbitrarily bounded microservices).
   
   
