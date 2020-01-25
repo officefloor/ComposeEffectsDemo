@@ -54,9 +54,9 @@ Monad with IoCC provides Process/Thread model
 
   Now, I'd like to take another tact to the problem.
 
-  The {{{https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf}Imperative Functional Programming}} paper could not see how to remove the continuation type (z) from the signature. The authors did conclude monads and CPS very similar, but due to the extra continuation type on the signature and the author's intuition that the IO Monad was the direction forward.
+  The {{{https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf}Imperative Functional Programming}} paper could not see how to remove the continuation type (z) from the signature. The authors did conclude Monads and CPS very similar, but due to the extra continuation type on the signature and the author's intuition that the IO Monad was the direction forward.
 
-  Now I certainly am not taking the tact to replace IO Monad with CPS. I'm looking to create a complementary model. A model where continuations decouple the IO monads.
+  Now I certainly am not taking the tact to replace IO Monad with CPS. I'm looking to create a complementary model. A model where continuations decouple the IO Monads.
 
   So introducing dependencies to the IO Monad, we get:
 
@@ -94,23 +94,23 @@ Monad with IoCC provides Process/Thread model
 
   Note: the joined IO need only handle y or any of it's super types. Hence, the relationship indicates the passed type. This makes it easy to inject in another IO for handling the continuation.
 
-  Now to start isolating the IO monads from each other, we are going to start with {{{https://sagenschneider.blogspot.com/2019/02/is-spring-reactive-already-obsolete.html}Thread Injection}}.
+  Now to start isolating the IO Monads from each other, we are going to start with {{{https://sagenschneider.blogspot.com/2019/02/is-spring-reactive-already-obsolete.html}Thread Injection}}.
 
 +----------
   d -> Executor
 +----------
   
-  This represents Thread Injection choosing the appropriate Executor from the dependencies.  Therefore, we can then introduce a Thread Injection monad to choose the Executor.
+  This represents Thread Injection choosing the appropriate Executor from the dependencies.  Therefore, we can then introduce a Thread Injection Monad to choose the Executor.
 
 +----------
   F[_](d)(Executor) -> (d -> Executor) -> TI[F[_](d)] 
 +----------
 -----------
   where
-    TI is the Thread Injection monad that contains the dependency to Executor mapping to enable executing the IO monad with the appropriate Executor.
+    TI is the Thread Injection Monad that contains the dependency to Executor mapping to enable executing the IO Monad with the appropriate Executor.
 -----------
   
-  This then has the above continuation between IO monads relationship become.
+  This then has the above continuation between IO Monads relationship become.
   
 +----------
   TI[IO[_](d1)] -> (Either[Throwable,y] -> IO[y](d2)(Executor)) -> TI[IO[y](d2)]
@@ -125,8 +125,10 @@ Monad with IoCC provides Process/Thread model
 +----------
 -----------
   where
-    DI is the Dependency Injection monad that supplies dependencies to the function.
+    DI is the Dependency Injection Monad that supplies dependencies to the function.
 -----------
+
+  Note that DI Monad will also manage the life-cycle of the dependencies.  Discussion of how this is managed will be a topic for another article.
 
   So the above IO Monad continuation relationship becomes:
 
@@ -135,7 +137,7 @@ Monad with IoCC provides Process/Thread model
 +----------
 -----------
   where:
-    D propagates the same instances of dependencies across the continuation
+    DI propagates the same instances of dependencies across the continuation
 -----------
 
   Now, with Continuation Injection we are not limited to injecting in only one continuation.  We can inject in many:
@@ -174,9 +176,9 @@ Monad with IoCC provides Process/Thread model
   This allows for the following.
 
 -----------
-  Same thread = DI[P,T,_] -> (_ -> F[_](d)) -> DI[P,T,_]
-  Spawned thread = DI[P,T,_] -> (_ -> F[_](d)) -> DI[P,S,_]
-  New process = DI[P,T,_] -> (_ -> F[_](d)) -> DI[Q,S,_]
+  Same thread = DI[P,T,_] -> (_ -> _) -> DI[P,T,_]
+  Spawned thread = DI[P,T,_] -> (_ -> _) -> DI[P,S,_]
+  New process = DI[P,T,_] -> (_ -> _) -> DI[Q,S,_]
 -----------
 
   In other words,
@@ -191,7 +193,7 @@ Monad with IoCC provides Process/Thread model
 
    * context (eg transactions) apply only to dependencies in T
 
-  The resulting IO monad relationship for a same thread continuation becomes.
+  The resulting IO Monad relationship for a same thread continuation becomes.
   
 +----------
   TI[DI[P,T,IO[_]]] -> (y -> IO[y](d)(Executor)) -> TI[DI[P,T,IO[y]]]
@@ -223,9 +225,13 @@ Monad with IoCC provides Process/Thread model
   
   What we now have is a possible "inversion" of the function:
   
-    * Function: strives to be pure, may have multiple inputs and only a single output.  I like to think of functions like machines - tools providing always predictable outputs.
+    * Function: strives to be pure, may have multiple inputs and only a single output.
     
-    * IoCC: allows impurities, has a single input and may have multiple outputs.  I like to think of IoCC like signals - mostly predictable outputs, which is more similar to organic structures.
+    * IoCC: allows impurities, has a single input and may have multiple outputs.
+
+  I personally like to think of functions like parts of a machine.  They are highly coupled engine cogs providing always predictable output.
+  
+  I then like to think of IoCC like signals. This is a more organic structure of loosely coupled events triggering other loosely coupled events. The result is a mostly predictable output. This is more similar to human decisioning outputs.
 
   Regardless, we now have a typed model that can be represented as a directed graph of interactions. The IO Monads are the nodes with the various continuations edges between them. An edge in the graph is qualified as follows.
   
@@ -274,15 +280,15 @@ Future Work
   Note that we can model interprocess communication as:
 
 +----------
-  Async (e.g. queue) = DI[P,T,_] -> (message -> F[_](d)) -> DI[Q,S,_] -> ()
-  Sync (e.g. REST)  = D[P,T,_] -> (request -> F[_](d)) -> D[Q,S,_] -> (response -> G[_](d)) -> D[P,T,_]
+  Async (e.g. queue) = DI[P,T,_] -> (message -> _) -> DI[Q,S,_] -> ()
+  Sync (e.g. REST)  = D[P,T,_] -> (request -> _) -> D[Q,S,_] -> (response -> _) -> D[P,T,_]
 +----------
 
   This can provide type safe modeling of distributing the IOs within the directed continuation graph.
     
-  Note that we may have to mark dependency instances that carry non-replicatable state between IO monads.  In other words, a database connection (not in transactional context) can be replicated by obtaining another database connection from the pool.  However, a dependency that stores some value in it from one IO monad that is used by the next IO monad is non-replicable.
+  Note that we may have to mark dependency instances that carry non-replicatable state between IO Monads.  In other words, a database connection (not in transactional context) can be replicated by obtaining another database connection from the pool.  However, a dependency that stores some value in it from one IO Monad that is used by the next IO Monad is non-replicable.
   
-  In practice, this has only been variable dependencies to further remove the parameter coupling between IO monads (see {{{http://officefloor.net/tutorials/}OfficeFloor tutorials}}).
+  In practice, this has only been variable dependencies to further remove the parameter coupling between IO Monads (see {{{http://officefloor.net/tutorials/}OfficeFloor tutorials}}).
   
   However, we are also finding in practice that it is relatively intuitive to find sub graphs to isolate to their own containers.  Endeavours in this work will likely look at automation of dynamically isolated sub graphs to containers as load changes (effectively having selective elastic scale of functions not arbitrarily scoped microservices).
   
