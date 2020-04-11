@@ -1,5 +1,8 @@
 package net.officefloor.demo
 
+import java.util.concurrent.Callable
+import java.util.function.Supplier
+
 import zio.ZIO
 import cats.effect.IO
 import reactor.core.publisher.Mono
@@ -14,7 +17,7 @@ object SynchronousLogic {
     } yield response
 
   def catsGetMessage(id: Int)(implicit repository: MessageRepository): IO[Message] =
-    IO.apply(repository findById id orElseThrow)
+    IO.apply(repository findById id orElseThrow noSuchElement)
   // END SNIPPET: cats
 
 
@@ -23,7 +26,7 @@ object SynchronousLogic {
     reactorGetMessage(request.getId).map(message => new ServerResponse(s"${message.getContent} via Reactor"))
 
   def reactorGetMessage(id: Int)(implicit repository: MessageRepository): Mono[Message] =
-    Mono.fromCallable(() => repository.findById(id).orElseThrow())
+    Mono.fromCallable(() =>  repository findById id orElseThrow noSuchElement)
   // END SNIPPET: reactor
 
 
@@ -42,7 +45,7 @@ object SynchronousLogic {
   }
 
   def zioGetMessage(id: Int): ZIO[InjectMessageRepository, Throwable, Message] =
-    ZIO.accessM(env => ZIO.effect(env.messageRepository.findById(id).orElseThrow()))
+    ZIO.accessM(env => ZIO.effect(env.messageRepository.findById(id).orElseThrow(noSuchElement)))
 
   trait InjectMessageRepository {
     val messageRepository: MessageRepository
@@ -52,9 +55,10 @@ object SynchronousLogic {
 
   // START SNIPPET: imperative
   def imperative(request: ServerRequest, repository: MessageRepository): ServerResponse = {
-    val message = repository.findById(request.getId).orElseThrow()
+    val message = repository.findById(request.getId).orElseThrow(noSuchElement)
     new ServerResponse(s"${message.getContent} via Imperative")
   }
   // END SNIPPET: imperative
 
+  def noSuchElement(): Supplier[NoSuchElementException] = () => new NoSuchElementException()
 }
