@@ -60,7 +60,5 @@ object SynchronousLogic {
   }
   // END SNIPPET: imperative
 
-  def noSuchElement(): Supplier[NoSuchElementException] = new Supplier[NoSuchElementException] {
-    override def get(): NoSuchElementException = new NoSuchElementException()
-  }
+  def noSuchElement(): Supplier[NoSuchElementException] = () => new NoSuchElementException()
 }
