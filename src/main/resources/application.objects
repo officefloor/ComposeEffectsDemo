@@ -9,6 +9,7 @@
 		<property name="protocol" value="h2:mem" />
 		<property name="database" value="testdb" />
 		<property name="user" value="sa" />
+		<property name="password" value="password" />
 	</managed-object>
 	<managed-object class="net.officefloor.demo.AsyncMessageRepository" />
 
