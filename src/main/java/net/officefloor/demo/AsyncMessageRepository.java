@@ -1,6 +1,6 @@
 package net.officefloor.demo;
 
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.r2dbc.R2dbcSource;
 import reactor.core.publisher.Mono;
 import scala.util.Either;
@@ -11,8 +11,7 @@ import java.util.function.Consumer;
 
 public class AsyncMessageRepository {
 
-    @Dependency
-    private R2dbcSource source;
+    private @Dependency R2dbcSource source;
 
     public void getMessage(Integer id, Consumer<Either<Throwable, Message>> callback) {
         source.getConnection()
