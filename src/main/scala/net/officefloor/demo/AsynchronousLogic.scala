@@ -15,7 +15,10 @@ object AsynchronousLogic {
     } yield response
 
   def catsGetMessage(id: Int)(implicit repository: AsyncMessageRepository): IO[Message] =
-    IO.async(callback => repository.getMessage(id, result => callback.apply(result)))
+    IO.async(callback => IO {
+      repository.getMessage(id, result => callback.apply(result))
+      Some(IO())
+    })
 
 
   def zio(request: ServerRequest, repository: AsyncMessageRepository): ZIO[Any, Throwable, ServerResponse] = {
